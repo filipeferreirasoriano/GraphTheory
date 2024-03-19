@@ -3,7 +3,7 @@
 using namespace std;
 
 vector<int> pre;
-vector<pair<int, int>> post;
+vector<int> post;
 int cnt = 0;
 int cnt2 = 0;
 
@@ -35,7 +35,7 @@ void dfs_rec(vector<vector<int>> &adj_list, int i)
         }
     }
 
-    post[i] = {cnt2++, i};
+    post[i] = cnt2++;
 }
 
 void dfs_post(vector<vector<int>> &adj_list)
@@ -48,6 +48,19 @@ void dfs_post(vector<vector<int>> &adj_list)
             dfs_rec(adj_list, i);
         }
     }
+}
+
+void sort_post_vector()
+{
+    int size = post.size();
+    vector<int> aux(size);
+
+    for(int i = 0; i < size; i++)
+    {
+        aux[post[i]] = i;
+    }
+
+    post = aux;
 }
 
 void dfs_pre_rec(vector<vector<int>> &adj_list, int i, vector<int> &scc)
@@ -68,27 +81,26 @@ vector<vector<int>> dfs_pre(vector<vector<int>> &adj_list)
 {
     vector<vector<int>> sccs;
 
-    pre.clear();
-    pre.resize(adj_list.size(), 0);
+    //pre.clear();
+    pre.assign(adj_list.size(), 0);
     cnt = 0;
 
-    for(auto i: post)
+    int size = post.size();
+
+    sort_post_vector();
+
+    for(int i = size - 1; i >= 0; i--)
     {
-        if(!pre[i.second])
+        if(!pre[post[i]])
         {
             vector<int> scc;
-            dfs_pre_rec(adj_list, i.second, scc);
+            dfs_pre_rec(adj_list, post[i], scc);
 
             sccs.push_back(scc);
         }
     }
 
     return sccs;
-}
-
-int func(pair<int, int> a, pair<int, int> b)
-{
-    return a.first > b.first;
 }
 
 int main(int argc, char *argv[])
@@ -161,8 +173,6 @@ int main(int argc, char *argv[])
 
     dfs_post(reversed_graph);
 
-    sort(post.begin(), post.end(), func);
-
     vector<vector<int>> sccs = dfs_pre(adj_list);
 
     if(out_file != "")
@@ -179,9 +189,9 @@ int main(int argc, char *argv[])
         {
             for(auto i: scc)
             {
-                cout << i << ' ';
+                output << i + 1 << ' ';
             }
-            cout << '\n';
+            output << '\n';
         }
     }
 
