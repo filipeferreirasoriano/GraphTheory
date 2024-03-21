@@ -12,7 +12,7 @@ void floyd_warshall(vector<vector<int>> &adj_list)
         {
             for (int j = 0; j < n; ++j)
             {
-                if (adj_list[i][k] < INT_MAX && adj_list[k][j] < INT_MAX)
+                if (i != k && k != j && adj_list[i][k] < INT_MAX && adj_list[k][j] < INT_MAX)
                 {
                     adj_list[i][j] = min(adj_list[i][j], adj_list[i][k] + adj_list[k][j]);
                 }
@@ -25,6 +25,7 @@ int main(int argc, char *argv[])
 {
     string in_file = "";
     string out_file = "";
+    int first = -1;
 
     for(int i = 1; i < argc; i++)
     {
@@ -35,8 +36,8 @@ int main(int argc, char *argv[])
             cout << "Help:\n"
             << "-h: mostra o help\n"
             << "-o <arquivo>: redireciona a saida para o 'arquivo'\n"
-            << "-f <arquivo>: indica o 'arquivo que contem o grafo de entrada\n";
-
+            << "-f <arquivo>: indica o 'arquivo que contem o grafo de entrada\n"
+            << "-i: vertice inicial\n";
             return 0;
         }
         else if(arg == "-o" && i < (argc - 1))
@@ -46,6 +47,10 @@ int main(int argc, char *argv[])
         else if(arg == "-f" && i < (argc - 1))
         {
             in_file = argv[++i];
+        }
+        else if(arg == "-i" && i < (argc - 1))
+        {
+            first = atoi(argv[++i]);
         }
     }
 
@@ -81,26 +86,63 @@ int main(int argc, char *argv[])
         input >> u >> v >> w;
 
         adj_list[u - 1][v - 1] = w;
-        adj_list[v - 1][u - 1] = w;
     }
 
     input.close();
 
     floyd_warshall(adj_list);
 
-    for(int i = 0; i < n; i++)
+    if(first == -1)
     {
-        cout << i + 1 << ": ";
-        for(int j = 0; j < n; j++)
+        for(int i = 0; i < n; i++)
         {
-            cout << "(" << j + 1 << ", ";
-            if(adj_list[i][j] != INT_MAX)
+            cout << i + 1 << ": ";
+            
+            if(adj_list[i][i] < 0)
             {
-                cout << adj_list[i][j] << ") ";
+                cout << -INT_MAX << ") ";
             }
             else
             {
-                cout << "-1) ";
+                for(int j = 0; j < n; j++)
+                {
+                    cout << "(" << j + 1 << ", ";
+
+                    if(adj_list[i][j] != INT_MAX)
+                    {
+                        cout << adj_list[i][j] << ") ";
+                    }
+                    else
+                    {
+                        cout << "-1) ";
+                    }
+                }
+            }
+            cout << "\n";
+        }
+    }
+    else
+    {
+        cout << first << ": ";
+
+        if(adj_list[first - 1][first - 1] < 0)
+        {
+            cout << -INT_MAX << ") ";
+        }
+        else
+        {
+            for(int j = 0; j < n; j++)
+            {
+                cout << "(" << j + 1 << ", ";
+
+                if(adj_list[first - 1][j] != INT_MAX)
+                {
+                    cout << adj_list[first - 1][j] << ") ";
+                }
+                else
+                {
+                    cout << "-1) ";
+                }
             }
         }
         cout << "\n";
@@ -117,19 +159,53 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        for(int i = 0; i < n; i++)
+        if(first == -1)
         {
-            output << i + 1 << ": ";
-            for(int j = 0; j < n; j++)
+            for(int i = 0; i < n; i++)
             {
-                output << "(" << j + 1 << ", ";
-                if(adj_list[i][j] != INT_MAX)
+                output << i + 1 << ": ";
+                if(adj_list[i][i] < 0)
                 {
-                    output << adj_list[i][j] << ") ";
+                    output << -INT_MAX << ") ";
                 }
                 else
                 {
-                    output << "-1) ";
+                    for(int j = 0; j < n; j++)
+                    {
+                        output << "(" << j + 1 << ", ";
+                        if(adj_list[i][j] != INT_MAX)
+                        {
+                            output << adj_list[i][j] << ") ";
+                        }
+                        else
+                        {
+                            output << "-1) ";
+                        }
+                    }
+                }
+                output << "\n";
+            }
+        }
+        else
+        {
+            output << first << ": ";
+            if(adj_list[first - 1][first - 1] < 0)
+            {
+                output << -INT_MAX << ") ";
+            }
+            else
+            {
+                for(int j = 0; j < n; j++)
+                {
+                    output << "(" << j + 1 << ", ";
+                    if(adj_list[first - 1][j] != INT_MAX)
+                    {
+                        output << adj_list[first - 1][j] << ") ";
+                    }
+                    else
+                    {
+                        output << "-1) ";
+                    }
                 }
             }
             output << "\n";

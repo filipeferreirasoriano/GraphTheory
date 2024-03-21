@@ -80,7 +80,6 @@ int main(int argc, char *argv[])
 {
     string in_file = "";
     string out_file = "";
-    int first = 1;
     bool print_solution = false;
 
     for(int i = 1; i < argc; i++)
@@ -104,10 +103,6 @@ int main(int argc, char *argv[])
         else if(arg == "-f" && i < (argc - 1))
         {
             in_file = argv[++i];
-        }
-        else if(arg == "i" && i < (argc - 1))
-        {
-            first = atoi(argv[++i]);
         }
         else if(arg == "-s")
         {
@@ -146,8 +141,6 @@ int main(int argc, char *argv[])
 
         adj_list.push_back({u - 1, v - 1, w});
     }
-
-    first--;
 
     input.close();
 
