@@ -2,45 +2,75 @@
 
 using namespace std;
 
-vector<pair<int, int>> prim(vector<vector<pair<int, int>>> &adj, int first, int &min_cost)
+vector<int> parent;
+vector<int> height;
+
+struct Edge
 {
-    int size = adj.size();
+    int u;
+    int v;
+    int w;
+};
 
-    vector<pair<int, int>> agm(size);
+int func(Edge a, Edge b)
+{
+    return a.w < b.w;
+}
 
-    vector<int> parent(size, -1);
-    vector<int> cost(size, INT_MAX);
-    vector<bool> visited(size, false);
+void make_set(int x)
+{
+    parent[x] = x;
+    height[x] = 0;
+}
 
-    cost[first] = 0;
-
-    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> p_queue;
-
-    p_queue.push({cost[first], first});
-
-    while(!p_queue.empty())
+int find_set(int x)
+{
+    if(x == parent[x])
     {
-        int u = p_queue.top().second;
-        p_queue.pop();
+        return x;
+    }
+    return parent[x] = find_set(parent[x]);
+}
 
-        visited[u] = true;
+void union_set(int a, int b)
+{
+    a = find_set(a);
+    b = find_set(b);
 
-        for(auto v: adj[u])
+    if(a != b)
+    {
+        if(height[a] < height[b])
         {
-            if(!visited[v.first] && cost[v.first] > v.second)
-            {
-                cost[v.first] = v.second;
-                parent[v.first] = u;
-
-                p_queue.push({cost[v.first], v.first});
-            }
+            int aux = a;
+            a = b;
+            b = aux;
         }
+        if(height[a] == height[b])
+        {
+            height[a]++;
+        }
+        parent[b] = a;
+    }
+}
+
+vector<pair<int, int>> kruskal(vector<Edge> &adj, int &min_cost, int n)
+{
+    vector<pair<int, int>> agm;
+
+    for(int i = 0; i < n; i++)
+    {
+        make_set(i);
     }
 
-    for(int i = 0; i < size; i++)
+    for(auto edge: adj)
     {
-        agm[i] = {parent[i], i};
-        min_cost += cost[i];
+        if(find_set(edge.u) != find_set(edge.v))
+        {
+            min_cost += edge.w;
+            
+            union_set(edge.u, edge.v);
+            agm.push_back({edge.u, edge.v});
+        }
     }
 
     return agm;
@@ -105,23 +135,27 @@ int main(int argc, char *argv[])
 
     input >> n >> m;
 
-    vector<vector<pair<int, int>>> adj_list(n);
+    parent.resize(n);
+    height.resize(n);
+
+    vector<Edge> adj_list;
 
     for(int i = 0; i < m; i++)
     {
         input >> u >> v >> w;
 
-        adj_list[u - 1].push_back({v - 1, w});
-        adj_list[v - 1].push_back({u - 1, w});
+        adj_list.push_back({u - 1, v - 1, w});
     }
 
     first--;
 
     input.close();
+
+    sort(adj_list.begin(), adj_list.end(), func);
     
     int min_cost = 0;
-    
-    vector<pair<int, int>> agm = prim(adj_list, first, min_cost);
+
+    vector<pair<int, int>> agm = kruskal(adj_list, min_cost, n);
 
     if(out_file != "")
     {
@@ -138,10 +172,7 @@ int main(int argc, char *argv[])
         {
             for(auto p: agm)
             {
-                if(p.first != -1)
-                {
-                    output << "(" << p.first + 1 << "," << p.second + 1 << ") ";
-                }
+                output << "(" << p.first + 1 << "," << p.second + 1 << ") ";
             }
             output << "\n";
         }
@@ -157,10 +188,7 @@ int main(int argc, char *argv[])
     {
         for(auto p: agm)
         {
-            if(p.first != -1)
-            {
-                cout << "(" << p.first + 1 << "," << p.second + 1 << ") ";
-            }
+            cout << "(" << p.first + 1 << "," << p.second + 1 << ") ";
         }
         cout << "\n";
     }
