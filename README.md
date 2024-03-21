@@ -1,6 +1,6 @@
 # GraphTheory
 
-# Students
+# Student
 Filipe Ferreira Figueredo Soriano Pinto
 
 # Algorithms
