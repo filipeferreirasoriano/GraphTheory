@@ -2,6 +2,8 @@
 
 using namespace std;
 
+bool negative_cycle = false;
+
 void floyd_warshall(vector<vector<int>> &adj_list)
 {
     int n = adj_list.size();
@@ -15,6 +17,11 @@ void floyd_warshall(vector<vector<int>> &adj_list)
                 if (i != k && k != j && adj_list[i][k] < INT_MAX && adj_list[k][j] < INT_MAX)
                 {
                     adj_list[i][j] = min(adj_list[i][j], adj_list[i][k] + adj_list[k][j]);
+                    if(i == j && adj_list[i][j] < 0)
+                    {
+                        negative_cycle = true;
+                        return;
+                    }
                 }
             }
         }
@@ -37,7 +44,7 @@ int main(int argc, char *argv[])
             << "-h: mostra o help\n"
             << "-o <arquivo>: redireciona a saida para o 'arquivo'\n"
             << "-f <arquivo>: indica o 'arquivo que contem o grafo de entrada\n"
-            << "-i: vertice inicial\n";
+            << "-i: para especificar o vertice o qual as distancias devem se basear\n";
             return 0;
         }
         else if(arg == "-o" && i < (argc - 1))
@@ -92,18 +99,18 @@ int main(int argc, char *argv[])
 
     floyd_warshall(adj_list);
 
-    if(first == -1)
+    if(negative_cycle)
     {
-        for(int i = 0; i < n; i++)
+        cout << "This graph has a negative cycle\n";
+    }
+    else
+    {
+        if(first == -1)
         {
-            cout << i + 1 << ": ";
-            
-            if(adj_list[i][i] < 0)
+            for(int i = 0; i < n; i++)
             {
-                cout << -INT_MAX << ") ";
-            }
-            else
-            {
+                cout << i + 1 << ": ";
+                
                 for(int j = 0; j < n; j++)
                 {
                     cout << "(" << j + 1 << ", ";
@@ -117,20 +124,13 @@ int main(int argc, char *argv[])
                         cout << "-1) ";
                     }
                 }
+                cout << "\n";
             }
-            cout << "\n";
-        }
-    }
-    else
-    {
-        cout << first << ": ";
-
-        if(adj_list[first - 1][first - 1] < 0)
-        {
-            cout << -INT_MAX << ") ";
         }
         else
         {
+            cout << first << ": ";
+
             for(int j = 0; j < n; j++)
             {
                 cout << "(" << j + 1 << ", ";
@@ -144,9 +144,10 @@ int main(int argc, char *argv[])
                     cout << "-1) ";
                 }
             }
+            cout << "\n";
         }
-        cout << "\n";
     }
+
 
     if(out_file != "")
     {
@@ -159,28 +160,26 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        if(first == -1)
+        if(negative_cycle)
+        {
+            output << "This graph has a negative cycle\n";
+        }
+        else if(first == -1)
         {
             for(int i = 0; i < n; i++)
             {
                 output << i + 1 << ": ";
-                if(adj_list[i][i] < 0)
+
+                for(int j = 0; j < n; j++)
                 {
-                    output << -INT_MAX << ") ";
-                }
-                else
-                {
-                    for(int j = 0; j < n; j++)
+                    output << "(" << j + 1 << ", ";
+                    if(adj_list[i][j] != INT_MAX)
                     {
-                        output << "(" << j + 1 << ", ";
-                        if(adj_list[i][j] != INT_MAX)
-                        {
-                            output << adj_list[i][j] << ") ";
-                        }
-                        else
-                        {
-                            output << "-1) ";
-                        }
+                        output << adj_list[i][j] << ") ";
+                    }
+                    else
+                    {
+                        output << "-1) ";
                     }
                 }
                 output << "\n";
@@ -189,23 +188,17 @@ int main(int argc, char *argv[])
         else
         {
             output << first << ": ";
-            if(adj_list[first - 1][first - 1] < 0)
+            for(int j = 0; j < n; j++)
             {
-                output << -INT_MAX << ") ";
-            }
-            else
-            {
-                for(int j = 0; j < n; j++)
+                output << "(" << j + 1 << ", ";
+
+                if(adj_list[first - 1][j] != INT_MAX)
                 {
-                    output << "(" << j + 1 << ", ";
-                    if(adj_list[first - 1][j] != INT_MAX)
-                    {
-                        output << adj_list[first - 1][j] << ") ";
-                    }
-                    else
-                    {
-                        output << "-1) ";
-                    }
+                    output << adj_list[first - 1][j] << ") ";
+                }
+                else
+                {
+                    output << "-1) ";
                 }
             }
             output << "\n";

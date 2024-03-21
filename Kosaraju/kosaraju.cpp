@@ -160,6 +160,8 @@ int main(int argc, char *argv[])
         adj_list[u - 1].push_back(v - 1);
     }
 
+    input.close();
+
     vector<vector<int>> reversed_graph = reverse_graph(adj_list);
 
     cnt = 0;
@@ -193,6 +195,8 @@ int main(int argc, char *argv[])
             }
             output << '\n';
         }
+
+        output.close();
     }
 
     for(auto scc: sccs)
